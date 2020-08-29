@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/chavarit14785/gofinal/customers"
+	"gofinal/customers"
+
 	"github.com/gin-gonic/gin"
 )
 
