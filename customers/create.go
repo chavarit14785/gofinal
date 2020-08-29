@@ -33,7 +33,8 @@ func (cus customer) insert() (customer, error) {
 	}, nil
 }
 
-func createTable() error {
+//CreateTable is init function for customers
+func CreateTable() error {
 	url := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("postgres", url)
 	defer db.Close()
@@ -60,12 +61,6 @@ func PostCreateCustomerHandler(c *gin.Context) {
 	err := c.ShouldBindJSON(&cus)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err,
-		})
-	}
-	err = createTable()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err,
 		})
 	}

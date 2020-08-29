@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"gofinal/customers"
@@ -11,6 +12,11 @@ import (
 
 func main() {
 	fmt.Println("customer service")
+	err := customers.CreateTable()
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	r := setRouter()
 	r.Run(":2009")
 	//run port ":2009"
