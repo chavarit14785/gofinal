@@ -28,8 +28,6 @@ func selectByID(rowID int) (customer, error) {
 		log.Println(err)
 		return customer{}, err
 	}
-	log.Println(rowID)
-	log.Println(id, name, status)
 	return customer{
 		ID:     id,
 		Name:   name,
