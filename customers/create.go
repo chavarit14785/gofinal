@@ -10,26 +10,30 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func insert(cus customer) customer {
+func (cus customer) insert() (customer, error) {
 	url := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("postgres", url)
 	defer db.Close()
+	if err != nil {
+		log.Println(err)
+		return customer{}, err
+	}
 	row := db.QueryRow("insert into customers (name, email, status) values ($1,$2,$3) returning id", cus.Name, cus.Email, cus.Status)
 	var id int
 	err = row.Scan(&id)
 	if err != nil {
 		log.Println(err)
-		return customer{}
+		return customer{}, err
 	}
 	return customer{
 		ID:     id,
 		Name:   cus.Name,
 		Email:  cus.Email,
 		Status: cus.Status,
-	}
+	}, nil
 }
 
-func createTable() {
+func createTable() error {
 	url := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("postgres", url)
 	defer db.Close()
@@ -45,8 +49,9 @@ func createTable() {
 
 	if err != nil {
 		log.Println(err)
-		return
+		return err
 	}
+	return nil
 }
 
 //PostCreateCustomerHandler is handler function
@@ -54,9 +59,21 @@ func PostCreateCustomerHandler(c *gin.Context) {
 	var cus customer
 	err := c.ShouldBindJSON(&cus)
 	if err != nil {
-		return
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err,
+		})
 	}
-	createTable()
-	r := insert(cus)
+	err = createTable()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err,
+		})
+	}
+	r, err := cus.insert()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err,
+		})
+	}
 	c.JSON(http.StatusCreated, r)
 }
